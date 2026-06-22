@@ -1,16 +1,42 @@
+# Render deploy — web service only. The database is EXTERNAL (Supabase), so
+# there is no Render Postgres block here: that keeps your data provider-
+# independent, so you can later move this web service to Railway/Fly without
+# migrating the database (just reuse the same DATABASE_URL).
+#
+# Setup: create the service from this repo, then paste your Supabase pooler
+# connection string into DATABASE_URL. The app self-initializes its schema on
+# first boot (FORGEIQ_AUTO_INIT) and seeds demo data once (FORGEIQ_SEED_DEMO).
 services:
   - type: web
     name: forgeiq-api
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      # Supabase connection string (Settings → Database → Connection string →
+      # URI, "Connection pooling" / Transaction mode recommended).
       - key: DATABASE_URL
         sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
+      # Apply schema + config seed on boot so a fresh DB self-initializes.
+      - key: FORGEIQ_AUTO_INIT
+        value: "1"
+      # Load demo leads on first deploy so the dashboard isn't empty.
+      # Set to "0" and redeploy once you have real data.
+      - key: FORGEIQ_SEED_DEMO
+        value: "1"
+      # Founder console key — gates /admin. Render generates a random value;
+      # read it in the dashboard (Environment tab) to sign into /admin.
+      - key: ADMIN_API_KEY
+        generateValue: true
+      # API signing secret.
       - key: SECRET_KEY
         generateValue: true
+      # Optional — enables the AI Copilot's full Claude tool-calling and
+      # LLM entity resolution. Leave blank to run Copilot in fallback mode.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Optional — paid ICEGATE import-data vendor key.
       - key: ZAUBA_API_KEY
         sync: false
