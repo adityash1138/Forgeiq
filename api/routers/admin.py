@@ -223,3 +223,66 @@ def job_log(limit: int = Query(100, le=500)):
     return fetch_all(
         "SELECT job_name, status, started_at, finished_at, error "
         "FROM job_runs ORDER BY finished_at DESC LIMIT %s", (limit,))
+
+
+# ── 11. manual scraper trigger ─────────────────────────────────────────────
+@router.post("/run-scrapers")
+def run_scrapers(tier: Optional[str] = Query(None, description="1, 2, 3, or all")):
+    """Manually trigger scrapers. Protected by x-admin-key.
+    tier=1 → BSE/GEM/PLI/ICEGATE  tier=2 → jobs/land/news  tier=3 → RSS/news
+    Omit tier (or tier=all) to run everything.
+    Also runs the full pipeline (entity resolve + score + deliver) after scraping.
+    """
+    from datetime import datetime
+    results = {}
+    start = datetime.now()
+
+    def _run(name: str, fn):
+        try:
+            count = fn()
+            results[name] = {"status": "ok", "signals": count}
+        except Exception as exc:
+            results[name] = {"status": "error", "error": str(exc)}
+
+    t = (tier or "all").strip()
+
+    if t in ("1", "all"):
+        from scrapers.bse_scraper import BseScraper
+        from scrapers.gem_scraper import GemScraper
+        from scrapers.pli_scraper import PliScraper
+        _run("bse", lambda: BseScraper().run())
+        _run("gem", lambda: GemScraper().run())
+        _run("pli", lambda: PliScraper().run())
+
+    if t in ("2", "all"):
+        from scrapers.news_scraper import NewsScraper
+        from scrapers.oem_news_scraper import OemNewsScraper
+        from scrapers.vc_scraper import VcScraper
+        _run("news", lambda: NewsScraper().run())
+        _run("oem_news", lambda: OemNewsScraper().run())
+        _run("vc", lambda: VcScraper().run())
+
+    if t in ("3", "all"):
+        from scrapers.jobs_scraper import JobsScraper
+        from scrapers.land_scraper import LandScraper
+        _run("jobs", lambda: JobsScraper().run())
+        _run("land", lambda: LandScraper().run())
+
+    # run pipeline after scraping
+    try:
+        from processing import deduplicator, entity_resolver, app_tagger
+        from engine import scoring_engine, cascade_engine
+        from delivery import lead_router
+        deduplicator.process_new_signals()
+        app_tagger.tag_new_signals()
+        entity_resolver.resolve_new_signals()
+        entity_resolver.process_queue_daily()
+        scoring_engine.recalculate_all_due()
+        cascade_engine.process_cascade_states_daily()
+        lead_router.route_hot_scores()
+        results["pipeline"] = {"status": "ok"}
+    except Exception as exc:
+        results["pipeline"] = {"status": "error", "error": str(exc)}
+
+    elapsed = round((datetime.now() - start).total_seconds(), 1)
+    return {"ok": True, "elapsed_seconds": elapsed, "results": results}
