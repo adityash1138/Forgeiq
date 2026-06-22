@@ -202,15 +202,30 @@ def _trigger_score_recalc(company_id: str) -> None:
         pass  # daily scoring pass is the safety net
 
 
+def _maybe_start_cascade(signal_id: str, tier: str) -> None:
+    """If a trigger signal resolved (Tier A/B), spawn its cascade waves."""
+    if tier not in ("A", "B"):
+        return
+    try:
+        from engine.cascade_engine import on_cascade_trigger_signal
+        on_cascade_trigger_signal(signal_id)
+    except Exception:
+        pass  # daily cascade pass is not affected; this is a fast-path only
+
+
 def resolve(signal_id: str, raw_name: str, snippet: str) -> str:
     """Full two-stage resolution for one signal. Returns the tier letter."""
     comp_id, conf = structured_match(raw_name, snippet)
     if conf >= 70:
-        return _route_and_persist(signal_id, raw_name, comp_id, conf)
+        tier = _route_and_persist(signal_id, raw_name, comp_id, conf)
+        _maybe_start_cascade(signal_id, tier)
+        return tier
 
     # Structured matching was weak — escalate to Claude.
     comp_id, conf = llm_match(raw_name, snippet, _get_candidates())
-    return _route_and_persist(signal_id, raw_name, comp_id, conf)
+    tier = _route_and_persist(signal_id, raw_name, comp_id, conf)
+    _maybe_start_cascade(signal_id, tier)
+    return tier
 
 
 def resolve_signal(signal_row_id: str) -> str:
