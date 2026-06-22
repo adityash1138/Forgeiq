@@ -98,12 +98,45 @@ DEMO = [
      [("Deepa Iyer", "Procurement Lead", "deepa.iyer@mahindra.com", "Low")]),
 
     (6, "Amara Raja Energy Ltd", "L31402AP1985PLC000006", "Tirupati, Andhra Pradesh",
-     APP_PACK, 38.0, "COLD", "Value", 0,
+     APP_PACK, 18.9, "COLD", "Value", 0,
      "Why this lead — Amara Raja Energy (Battery Pack Assembly)\n\n"
-     "• 22 May 2026 — NEWS_EXPANSION (Tier 3): press note mentions gigafactory "
-     "intent; no hard CAPEX yet.\n",
+     "• 22 May 2026 — NEWS_MENTION (Tier 3): press note mentions gigafactory "
+     "intent; no hard CAPEX yet.\n\n"
+     "Score reduced 0.3x — a competitor is locked in for this application "
+     "(see competitor intel).",
      []),
 ]
+
+# Real raw_signals per company → drives the lead card's signal timeline.
+# (signal_type, days_ago, snippet)
+SIGNALS: dict[int, list[tuple[str, int, str]]] = {
+    1: [("CAPEX_FILING", 10, "BSE filing: ₹650cr expansion for a new cell line in Hosur"),
+        ("LAND_ACQUISITION", 4, "40-acre SIPCOT allotment adjacent to existing plant"),
+        ("JOB_POSTING", 2, "14 openings for cell-line process engineers, Hosur")],
+    2: [("PLI_APPROVAL", 17, "Listed in the ACC battery PLI beneficiary update"),
+        ("EC_CLEARANCE", 8, "Environmental clearance for a lithium-cell unit, Karnataka")],
+    3: [("ICEGATE_IMPORT", 12, "Import of pack-assembly machinery (HS 8479), Chennai port"),
+        ("OEM_CONTRACT_WIN", 6, "Announced in-house battery pack line ramp-up")],
+    4: [("CAPEX_FILING", 20, "Board approves EV body-shop modernisation at Pune"),
+        ("JOB_POSTING", 3, "Welding-line automation engineer roles posted")],
+    5: [("LAND_ACQUISITION", 25, "MIDC industrial plot allotment at Chakan")],
+    6: [("NEWS_MENTION", 31, "Press note mentions gigafactory intent; no hard CAPEX yet")],
+}
+
+# Competitor intelligence per company (brand, evidence, days_ago, confidence, move).
+COMPETITORS: dict[int, list[tuple[str, str, int, str, str]]] = {
+    1: [("Manz AG", "Tender specification mention", 15, "Low",
+         "Emphasise India-based commissioning + faster spares support")],
+    3: [("Hitachi High-Tech", "Existing line supplier", 40, "Medium",
+         "Position on lead-time and local service vs. imported support")],
+    6: [("Wuxi Lead", "Locked-in multi-year contract", 20, "High",
+         "De-prioritise — category is locked for this cycle")],
+}
+
+# Negative-signal flags (company_n → (flag_label, multiplier)) — score transparency.
+NEGATIVE: dict[int, tuple[str, float]] = {
+    6: ("COMPETITOR_LOCKED_IN", 0.3),
+}
 
 
 def seed() -> None:
@@ -154,27 +187,67 @@ def seed() -> None:
             sid = _score_uuid(n)
             did = _delivery_uuid(n)
 
+            neg_flag, neg_mult = NEGATIVE.get(n, ("None", 1.0))
             cur.execute(
                 """
-                INSERT INTO companies (id, industry_id, legal_name, cin, plant_location)
-                VALUES (%s, %s, %s, %s, %s)
-                ON CONFLICT (id) DO NOTHING
+                INSERT INTO companies (id, industry_id, legal_name, cin,
+                                       plant_location, negative_flag, negative_flag_date)
+                VALUES (%s, %s, %s, %s, %s, %s, CASE WHEN %s <> 'None'
+                        THEN CURRENT_DATE ELSE NULL END)
+                ON CONFLICT (id) DO UPDATE
+                  SET negative_flag = EXCLUDED.negative_flag,
+                      negative_flag_date = EXCLUDED.negative_flag_date
                 """,
-                (cid, INDUSTRY_ID, legal, cin, loc),
+                (cid, INDUSTRY_ID, legal, cin, loc, neg_flag, neg_flag),
             )
+
+            # Real raw_signals so the lead card's timeline is populated.
+            for sig_type, days_ago, snippet in SIGNALS.get(n, []):
+                cur.execute(
+                    """
+                    INSERT INTO raw_signals
+                      (signal_id, industry_id, date_detected, signal_type,
+                       raw_company_name, resolved_company_id, entity_confidence_pct,
+                       resolution_tier, source, source_url, raw_text_snippet,
+                       application_tags)
+                    VALUES (%s, %s, CURRENT_DATE - %s, %s, %s, %s, 100, 'A',
+                            'DemoSeed', %s, %s, %s::uuid[])
+                    ON CONFLICT (signal_id) DO NOTHING
+                    """,
+                    (f"SIG-DEMO-{n}-{sig_type}", INDUSTRY_ID, days_ago, sig_type,
+                     legal, cid, f"https://demo.forgeiq/{sig_type.lower()}",
+                     snippet, [app_id]),
+                )
+
+            # Competitor intelligence for the lead card.
+            for brand, ev_type, days_ago, conf, move in COMPETITORS.get(n, []):
+                cur.execute(
+                    """
+                    INSERT INTO competitor_intelligence
+                      (company_id, application_id, competitor_brand, evidence_type,
+                       evidence_date, confidence, recommended_move)
+                    SELECT %s, %s, %s, %s, CURRENT_DATE - %s, %s, %s
+                    WHERE NOT EXISTS (
+                      SELECT 1 FROM competitor_intelligence
+                      WHERE company_id = %s AND competitor_brand = %s)
+                    """,
+                    (cid, app_id, brand, ev_type, days_ago, conf, move,
+                     cid, brand),
+                )
 
             cur.execute(
                 """
                 INSERT INTO scores
                   (id, company_id, application_id, current_score, status,
                    negative_multiplier, last_calculated_at)
-                VALUES (%s, %s, %s, %s, %s, 1.0, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (company_id, application_id) DO UPDATE
                   SET current_score = EXCLUDED.current_score,
                       status = EXCLUDED.status,
+                      negative_multiplier = EXCLUDED.negative_multiplier,
                       last_calculated_at = EXCLUDED.last_calculated_at
                 """,
-                (sid, cid, app_id, score, status, now),
+                (sid, cid, app_id, score, status, neg_mult, now),
             )
 
             contact_ids = []

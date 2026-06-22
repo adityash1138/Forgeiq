@@ -1,7 +1,7 @@
 """Pydantic request/response models for the ForgeIQ API."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -54,10 +54,42 @@ class ContactOut(BaseModel):
     email_pattern_guess: Optional[str] = None
 
 
+class SignalTimelineItem(BaseModel):
+    signal_type: str
+    label: str
+    tier: Optional[str] = None
+    date_detected: Optional[date] = None
+    source: Optional[str] = None
+    source_url: Optional[str] = None
+    snippet: Optional[str] = None
+    decay_position: Optional[float] = None       # 0-1 how "live" the signal is
+    contribution: Optional[float] = None          # points it added to raw score
+
+
+class CompetitorIntelOut(BaseModel):
+    competitor_brand: Optional[str] = None
+    evidence_type: Optional[str] = None
+    evidence_date: Optional[date] = None
+    confidence: Optional[str] = None
+    recommended_move: Optional[str] = None
+
+
+class ScoreBreakdown(BaseModel):
+    final_score: float
+    pre_adjustment_score: float                   # before negative multiplier
+    negative_multiplier: float
+    negative_flag: Optional[str] = None
+    max_possible: float
+
+
 class LeadDetail(LeadSummary):
     why_explanation: Optional[str] = None
     contacts: list[ContactOut] = []
     exclusivity_window_end: Optional[datetime] = None
+    plant_location: Optional[str] = None
+    signal_timeline: list[SignalTimelineItem] = []
+    competitor_intel: list[CompetitorIntelOut] = []
+    score_breakdown: Optional[ScoreBreakdown] = None
 
 
 # --- outcomes --------------------------------------------------------------

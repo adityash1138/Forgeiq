@@ -7,7 +7,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api.routers import auth, leads, outcomes, vendors
+from api.routers import admin, auth, leads, outcomes, vendors
 from db.connection import fetch_all, fetch_one
 
 app = FastAPI(title="ForgeIQ API", version="1.0")
@@ -30,10 +30,23 @@ if _static.exists():
     def dashboard():
         return FileResponse(str(_static / "index.html"))
 
+    @app.get("/onboarding", include_in_schema=False)
+    def onboarding():
+        return FileResponse(str(_static / "onboarding.html"))
+
+    @app.get("/admin", include_in_schema=False)
+    def admin_console():
+        return FileResponse(str(_static / "admin.html"))
+
+    @app.get("/buyer", include_in_schema=False)
+    def buyer_portal():
+        return FileResponse(str(_static / "buyer.html"))
+
 app.include_router(leads.router, prefix="/api/v1/leads", tags=["leads"])
 app.include_router(vendors.router, prefix="/api/v1/vendors", tags=["vendors"])
 app.include_router(outcomes.router, prefix="/api/v1/outcomes", tags=["outcomes"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
 
 # Webhooks (public, secured by their own secret in production).
 webhooks = APIRouter()
@@ -51,6 +64,19 @@ def whatsapp_outcome(delivery_id: str, response_code: int):
 
 
 app.include_router(webhooks, prefix="/webhook", tags=["webhooks"])
+
+
+@app.get("/api/v1/applications", tags=["meta"])
+def list_applications():
+    """Public: applications available for vendor onboarding (id + name)."""
+    return fetch_all(
+        """
+        SELECT a.id, a.application_name, a.production_line_type,
+               vc.category_name
+        FROM applications a
+        LEFT JOIN vendor_categories vc ON vc.id = a.category_id
+        ORDER BY a.application_name
+        """)
 
 
 @app.get("/health")

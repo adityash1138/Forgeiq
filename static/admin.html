@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeIQ — Admin Console</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/admin.css" />
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div id="admin-login" class="screen" style="display:flex;align-items:center;justify-content:center;">
+  <div class="login-card">
+    <div class="logo">⚡ ForgeIQ <span style="color:var(--warm)">Admin</span></div>
+    <p class="tagline">Founder console</p>
+    <form id="admin-login-form">
+      <label>Admin key</label>
+      <input id="admin-key-input" type="password" placeholder="ADMIN_API_KEY" required />
+      <button type="submit">Enter</button>
+    </form>
+    <p id="admin-login-error" class="error hidden"></p>
+  </div>
+</div>
+
+<!-- ADMIN CONSOLE -->
+<div id="admin-console" class="hidden admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-brand">⚡ Admin</div>
+    <nav id="admin-nav">
+      <a data-view="overview" class="active">Overview</a>
+      <a data-view="scrapers">Scraper Health</a>
+      <a data-view="entity-queue">Entity Queue</a>
+      <a data-view="scores">Scoring Runs</a>
+      <a data-view="signal-config">Signal Config</a>
+      <a data-view="cascade-config">Cascade Config</a>
+      <a data-view="outcomes">Outcomes</a>
+      <a data-view="vendors">Vendors</a>
+      <a data-view="deliveries">Lead Audit</a>
+      <a data-view="companies">Companies</a>
+      <a data-view="jobs">Job Log</a>
+    </nav>
+    <button id="admin-logout" class="btn-ghost" style="margin:1rem">Sign out</button>
+  </aside>
+  <main class="admin-main">
+    <h1 id="admin-view-title">Overview</h1>
+    <div id="admin-content"><div class="loading">Loading…</div></div>
+  </main>
+</div>
+
+<script src="/static/admin.js"></script>
+</body>
+</html>

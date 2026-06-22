@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeIQ — Vendor Onboarding</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div id="onboarding-screen" class="screen" style="display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div class="onboard-card">
+    <div class="logo">⚡ ForgeIQ</div>
+    <p class="tagline">Vendor onboarding · 4 quick questions</p>
+
+    <div class="progress"><div id="progress-bar" class="progress-bar"></div></div>
+
+    <!-- STEP 1: Company -->
+    <div class="step" data-step="1">
+      <label>What's your company name?</label>
+      <input id="f-vendor-name" type="text" placeholder="e.g. Bharat Automation Pvt Ltd" />
+      <div class="step-err hidden"></div>
+    </div>
+
+    <!-- STEP 2: Application -->
+    <div class="step hidden" data-step="2">
+      <label>Which production line do you sell equipment for?</label>
+      <select id="f-application"><option value="">Loading…</option></select>
+      <p class="hint">Leads are matched to this application.</p>
+      <div class="step-err hidden"></div>
+    </div>
+
+    <!-- STEP 3: Tier + deal size -->
+    <div class="step hidden" data-step="3">
+      <label>Exclusivity tier</label>
+      <div class="tier-cards">
+        <div class="tier-opt" data-tier="Premium">
+          <b>Premium</b><span>1 vendor · 72h head-start</span></div>
+        <div class="tier-opt" data-tier="Standard">
+          <b>Standard</b><span>2 vendors · 48h head-start</span></div>
+        <div class="tier-opt" data-tier="Value">
+          <b>Value</b><span>3 vendors · 24h head-start</span></div>
+      </div>
+      <label style="margin-top:1rem">Minimum deal size (₹)</label>
+      <input id="f-deal-size" type="number" placeholder="e.g. 5000000" />
+      <div class="step-err hidden"></div>
+    </div>
+
+    <!-- STEP 4: Geography -->
+    <div class="step hidden" data-step="4">
+      <label>Which states do you serve?</label>
+      <div id="geo-chips" class="geo-chips"></div>
+      <div class="step-err hidden"></div>
+    </div>
+
+    <!-- DONE -->
+    <div class="step hidden" data-step="done">
+      <div class="done-check">✓</div>
+      <h3 style="text-align:center">You're all set!</h3>
+      <p class="hint" style="text-align:center">Your API key — save it, it's how you sign in:</p>
+      <div class="api-key-box"><code id="new-api-key"></code>
+        <button id="copy-key" class="btn-ghost">Copy</button></div>
+      <a href="/" class="btn-primary" style="display:block;text-align:center;margin-top:1.2rem;text-decoration:none;padding:0.7rem;">Go to Dashboard →</a>
+    </div>
+
+    <div class="onboard-nav">
+      <button id="btn-back" class="btn-ghost hidden">← Back</button>
+      <button id="btn-next" class="btn-primary">Next →</button>
+    </div>
+    <p style="text-align:center;margin-top:1rem;font-size:0.8rem;">
+      <a href="/" style="color:var(--text-muted)">Already have a key? Sign in</a></p>
+  </div>
+</div>
+<script src="/static/onboarding.js"></script>
+</body>
+</html>
