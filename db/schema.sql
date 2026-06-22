@@ -12,21 +12,21 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- CORE REFERENCE TABLES (build first — everything depends on them)
 -- ============================================================================
 
-CREATE TABLE industries (
+CREATE TABLE IF NOT EXISTS industries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   industry_name TEXT NOT NULL,
   status TEXT DEFAULT 'active',   -- active | planned
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE vendor_categories (
+CREATE TABLE IF NOT EXISTS vendor_categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   industry_id UUID REFERENCES industries(id),
   category_name TEXT NOT NULL,
   category_type TEXT  -- Equipment | Component
 );
 
-CREATE TABLE applications (
+CREATE TABLE IF NOT EXISTS applications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   category_id UUID REFERENCES vendor_categories(id),
   application_name TEXT NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE applications (
 -- SIGNAL CONFIG TABLES (store in DB not code — edit without deployment)
 -- ============================================================================
 
-CREATE TABLE signal_type_config (
+CREATE TABLE IF NOT EXISTS signal_type_config (
   signal_type TEXT PRIMARY KEY,
   industry_id UUID REFERENCES industries(id),
   tier TEXT NOT NULL,          -- Tier1 | Tier2 | Tier3
@@ -52,7 +52,7 @@ CREATE TABLE signal_type_config (
   is_cascade_trigger TEXT      -- Yes | No | Partial
 );
 
-CREATE TABLE cascade_wave_config (
+CREATE TABLE IF NOT EXISTS cascade_wave_config (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trigger_signal_type TEXT REFERENCES signal_type_config(signal_type),
   application_id UUID REFERENCES applications(id),
@@ -62,7 +62,7 @@ CREATE TABLE cascade_wave_config (
   confirming_signal_types TEXT[]  -- array of signal_type strings
 );
 
-CREATE TABLE negative_signals_config (
+CREATE TABLE IF NOT EXISTS negative_signals_config (
   negative_signal_type TEXT PRIMARY KEY,
   severity_class TEXT,  -- Class1_Existential | Class2_Heavy | Class3_CategorySpecific
   multiplier NUMERIC(3,2),
@@ -75,7 +75,7 @@ CREATE TABLE negative_signals_config (
 -- COMPANY IDENTITY TABLES
 -- ============================================================================
 
-CREATE TABLE companies (
+CREATE TABLE IF NOT EXISTS companies (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   industry_id UUID REFERENCES industries(id),
   legal_name TEXT NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE companies (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE entity_resolution_queue (
+CREATE TABLE IF NOT EXISTS entity_resolution_queue (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   signal_id UUID,  -- references raw_signals
   raw_company_name TEXT,
@@ -107,7 +107,7 @@ CREATE TABLE entity_resolution_queue (
 -- CORE DATA TABLES
 -- ============================================================================
 
-CREATE TABLE raw_signals (
+CREATE TABLE IF NOT EXISTS raw_signals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   signal_id TEXT UNIQUE,           -- SIG-XXXXX human-readable
   industry_id UUID REFERENCES industries(id),
@@ -124,7 +124,7 @@ CREATE TABLE raw_signals (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE scores (
+CREATE TABLE IF NOT EXISTS scores (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID REFERENCES companies(id),
   application_id UUID REFERENCES applications(id),
@@ -136,7 +136,7 @@ CREATE TABLE scores (
   UNIQUE(company_id, application_id)
 );
 
-CREATE TABLE cascade_state (
+CREATE TABLE IF NOT EXISTS cascade_state (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trigger_signal_id UUID REFERENCES raw_signals(id),
   company_id UUID REFERENCES companies(id),
@@ -152,7 +152,7 @@ CREATE TABLE cascade_state (
 -- CONTACT, COMPETITOR, AND DELIVERY TABLES
 -- ============================================================================
 
-CREATE TABLE contacts (
+CREATE TABLE IF NOT EXISTS contacts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID REFERENCES companies(id),
   full_name TEXT,
@@ -166,7 +166,7 @@ CREATE TABLE contacts (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE competitor_intelligence (
+CREATE TABLE IF NOT EXISTS competitor_intelligence (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID REFERENCES companies(id),
   application_id UUID REFERENCES applications(id),
@@ -177,7 +177,7 @@ CREATE TABLE competitor_intelligence (
   recommended_move TEXT
 );
 
-CREATE TABLE vendors (
+CREATE TABLE IF NOT EXISTS vendors (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   vendor_name TEXT NOT NULL,
   industry_id UUID REFERENCES industries(id),
@@ -191,7 +191,7 @@ CREATE TABLE vendors (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE lead_delivery (
+CREATE TABLE IF NOT EXISTS lead_delivery (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   score_id UUID REFERENCES scores(id),
   vendor_id UUID REFERENCES vendors(id),
@@ -203,7 +203,7 @@ CREATE TABLE lead_delivery (
   human_spotcheck_done BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE outcomes (
+CREATE TABLE IF NOT EXISTS outcomes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   delivery_id UUID REFERENCES lead_delivery(id),
   outcome_status TEXT,
@@ -217,7 +217,7 @@ CREATE TABLE outcomes (
 -- JOB RUN LOG (scheduler observability)
 -- ============================================================================
 
-CREATE TABLE job_runs (
+CREATE TABLE IF NOT EXISTS job_runs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   job_name TEXT NOT NULL,
   status TEXT,                     -- success | failed | heartbeat
@@ -230,9 +230,9 @@ CREATE TABLE job_runs (
 -- INDEXES FOR PERFORMANCE
 -- ============================================================================
 
-CREATE INDEX idx_raw_signals_company ON raw_signals(resolved_company_id);
-CREATE INDEX idx_raw_signals_type_date ON raw_signals(signal_type, date_detected);
-CREATE INDEX idx_scores_company_app ON scores(company_id, application_id);
-CREATE INDEX idx_scores_status ON scores(status);
-CREATE INDEX idx_lead_delivery_vendor ON lead_delivery(vendor_id);
-CREATE INDEX idx_cascade_state_company ON cascade_state(company_id, wave_status);
+CREATE INDEX IF NOT EXISTS idx_raw_signals_company ON raw_signals(resolved_company_id);
+CREATE INDEX IF NOT EXISTS idx_raw_signals_type_date ON raw_signals(signal_type, date_detected);
+CREATE INDEX IF NOT EXISTS idx_scores_company_app ON scores(company_id, application_id);
+CREATE INDEX IF NOT EXISTS idx_scores_status ON scores(status);
+CREATE INDEX IF NOT EXISTS idx_lead_delivery_vendor ON lead_delivery(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_cascade_state_company ON cascade_state(company_id, wave_status);

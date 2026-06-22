@@ -12,6 +12,16 @@ from db.connection import fetch_all, fetch_one
 
 app = FastAPI(title="ForgeIQ API", version="1.0")
 
+
+@app.on_event("startup")
+def _startup_init_db():
+    """Self-initialize schema + config on a fresh database (idempotent).
+
+    Disabled by setting FORGEIQ_AUTO_INIT=0. See db/init_db.py.
+    """
+    from db.init_db import maybe_init_on_startup
+    maybe_init_on_startup()
+
 _static = Path(__file__).parent.parent / "static"
 if _static.exists():
     app.mount("/static", StaticFiles(directory=str(_static)), name="static")
