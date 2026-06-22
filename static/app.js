@@ -33,7 +33,7 @@ async function tryLogin(key) {
     const vendor = await apiFetch("/vendors/me");
     if (!vendor) return;
     localStorage.setItem("fiq_api_key", key);
-    $$("vendor-name").textContent = vendor.company_name || vendor.name || "Vendor";
+    $$("vendor-name").textContent = vendor.vendor_name || "Vendor";
     showScreen("dashboard");
     loadLeads();
   } catch {
