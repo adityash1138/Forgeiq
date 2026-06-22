@@ -15,6 +15,11 @@ services:
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      # Pin Python to a version with prebuilt wheels for pydantic-core etc.
+      # Without this, Render picks the newest Python (e.g. 3.14) which has no
+      # wheels yet, forcing a Rust source build that fails on its read-only FS.
+      - key: PYTHON_VERSION
+        value: "3.12.8"
       # Supabase connection string (Settings → Database → Connection string →
       # URI, "Connection pooling" / Transaction mode recommended).
       - key: DATABASE_URL
