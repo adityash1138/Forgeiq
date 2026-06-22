@@ -227,6 +227,47 @@ CREATE TABLE IF NOT EXISTS job_runs (
 );
 
 -- ============================================================================
+-- MARKETPLACE (RFQ flow) — buyer posts brief, AI matches vendors, proposals
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS rfqs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  buyer_email TEXT,
+  buyer_company TEXT,
+  company_id UUID REFERENCES companies(id),
+  application_id UUID REFERENCES applications(id),
+  title TEXT NOT NULL,
+  brief TEXT,                       -- plain-language requirement, not a fixed SKU
+  budget_range TEXT,
+  geography TEXT,
+  status TEXT DEFAULT 'open',       -- open | matched | proposals_in | closed
+  lead_fee_inr BIGINT,              -- charged when buyer shortlists
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS rfq_matches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  rfq_id UUID REFERENCES rfqs(id),
+  vendor_id UUID REFERENCES vendors(id),
+  match_score INTEGER,              -- capability + past-deals fit 0-100
+  match_reason TEXT,
+  notified_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(rfq_id, vendor_id)
+);
+
+CREATE TABLE IF NOT EXISTS proposals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  rfq_id UUID REFERENCES rfqs(id),
+  vendor_id UUID REFERENCES vendors(id),
+  summary TEXT,
+  lead_time_weeks INTEGER,
+  price_indication TEXT,
+  status TEXT DEFAULT 'submitted',  -- submitted | shortlisted | declined
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(rfq_id, vendor_id)
+);
+
+-- ============================================================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================================================
 

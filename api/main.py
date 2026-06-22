@@ -7,7 +7,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api.routers import admin, auth, leads, outcomes, vendors
+from api.routers import admin, auth, leads, marketplace, outcomes, vendors
 from db.connection import fetch_all, fetch_one
 
 app = FastAPI(title="ForgeIQ API", version="1.0")
@@ -42,11 +42,16 @@ if _static.exists():
     def buyer_portal():
         return FileResponse(str(_static / "buyer.html"))
 
+    @app.get("/marketplace", include_in_schema=False)
+    def marketplace_portal():
+        return FileResponse(str(_static / "marketplace.html"))
+
 app.include_router(leads.router, prefix="/api/v1/leads", tags=["leads"])
 app.include_router(vendors.router, prefix="/api/v1/vendors", tags=["vendors"])
 app.include_router(outcomes.router, prefix="/api/v1/outcomes", tags=["outcomes"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
+app.include_router(marketplace.router, prefix="/api/v1/marketplace", tags=["marketplace"])
 
 # Webhooks (public, secured by their own secret in production).
 webhooks = APIRouter()

@@ -22,6 +22,10 @@
     <p style="margin-top:1.2rem;font-size:0.82rem;color:var(--text-muted)">
       New vendor? <a href="/onboarding" style="color:var(--accent)">Create an account →</a>
     </p>
+    <p style="margin-top:0.4rem;font-size:0.82rem;color:var(--text-muted)">
+      Buyer? <a href="/marketplace" style="color:var(--accent)">Post a requirement</a>
+      · <a href="/buyer" style="color:var(--accent)">Free benchmark</a>
+    </p>
   </div>
 </div>
 
@@ -32,6 +36,7 @@
     <nav class="topnav">
       <a data-view="leads" class="active">Leads</a>
       <a data-view="feedback">Feedback</a>
+      <a data-view="marketplace">Marketplace</a>
       <a data-view="profile">Profile</a>
     </nav>
     <div class="header-right">
@@ -67,6 +72,15 @@
     <p class="subtle" style="margin-bottom:1rem">
       Logging outcomes trains ForgeIQ's scoring — closed-loop calibration.</p>
     <div id="feedback-list"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- MARKETPLACE VIEW -->
+  <div class="content view hidden" data-view="marketplace">
+    <div class="top-bar"><h1>Marketplace — RFQs matched to you</h1></div>
+    <p class="subtle" style="margin-bottom:1rem">
+      Buyers post requirements; ForgeIQ matches you by capability + track record.
+      Submit a custom proposal to win the deal.</p>
+    <div id="market-list"><div class="loading">Loading…</div></div>
   </div>
 
   <!-- PROFILE VIEW -->

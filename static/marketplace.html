@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeIQ — Marketplace</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header>
+  <div class="brand">⚡ ForgeIQ <span style="color:var(--accent)">Marketplace</span></div>
+  <div class="header-right"><a href="/" class="btn-ghost" style="text-decoration:none">Vendor sign in</a></div>
+</header>
+
+<div class="content" style="max-width:900px">
+  <div class="top-bar">
+    <h1>Post a Requirement</h1>
+    <button id="toggle-form" class="btn-primary">+ New RFQ</button>
+  </div>
+
+  <!-- RFQ FORM -->
+  <div id="rfq-form" class="benchmark hidden" style="margin-bottom:1.5rem">
+    <label class="ml">Title</label>
+    <input id="r-title" placeholder="e.g. Battery cell assembly line for 2GWh plant" />
+    <label class="ml">Describe what you need (plain language — not a fixed spec)</label>
+    <textarea id="r-brief" class="outcome-reason" style="min-height:90px"
+      placeholder="Turnkey cell line, ~2GWh, commissioning in Tamil Nadu by Q2…"></textarea>
+    <div class="row2">
+      <div><label class="ml">Application</label>
+        <select id="r-app"><option value="">Any</option></select></div>
+      <div><label class="ml">Geography</label>
+        <input id="r-geo" placeholder="e.g. Tamil Nadu" /></div>
+    </div>
+    <div class="row2">
+      <div><label class="ml">Budget range</label>
+        <input id="r-budget" placeholder="₹40-60 cr" /></div>
+      <div><label class="ml">Your company</label>
+        <input id="r-company" placeholder="Buyer company name" /></div>
+    </div>
+    <label class="ml">Your email</label>
+    <input id="r-email" placeholder="you@company.com" />
+    <button id="r-submit" class="btn-primary" style="margin-top:1rem">Post & match vendors</button>
+    <p id="r-msg" class="outcome-msg"></p>
+  </div>
+
+  <div class="top-bar"><h1 style="font-size:1.2rem">Open RFQs</h1></div>
+  <div id="rfq-list"><div class="loading">Loading…</div></div>
+</div>
+
+<!-- RFQ DETAIL MODAL -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal"><button id="modal-close" class="modal-close">✕</button>
+    <div id="modal-body"></div></div>
+</div>
+
+<style>
+  .ml{display:block;font-size:0.8rem;color:#7b82a8;margin:0.7rem 0 0.3rem}
+  .benchmark input,.benchmark select{width:100%;background:#0f1117;border:1px solid #2e3250;
+    color:#e8eaf6;padding:0.55rem 0.8rem;border-radius:6px;font-size:0.9rem;outline:none}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+</style>
+<script src="/static/marketplace.js"></script>
+</body>
+</html>

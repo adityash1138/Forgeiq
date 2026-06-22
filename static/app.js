@@ -325,6 +325,64 @@ function switchView(name) {
     v.classList.toggle("hidden", v.dataset.view !== name));
   if (name === "feedback") loadFeedback();
   if (name === "profile") loadProfile();
+  if (name === "marketplace") loadMarketplace();
+}
+
+// ── marketplace view (vendor side) ────────────────────────
+async function loadMarketplace() {
+  const box = $$("market-list");
+  box.innerHTML = `<div class="loading">Loading…</div>`;
+  try {
+    const rfqs = await apiFetch("/marketplace/my-rfqs");
+    if (!rfqs) return;
+    if (!rfqs.length) {
+      box.innerHTML = `<div class="empty">No RFQs matched to you yet.</div>`; return;
+    }
+    box.innerHTML = rfqs.map(r => `
+      <div class="market-card">
+        <div class="lead-card-top">
+          <div>
+            <div class="company-name">${esc(r.title)}</div>
+            <div class="application-name">${esc(r.application_name || "Any")} ·
+              ${esc(r.geography || "")} · ${esc(r.budget_range || "")}</div>
+          </div>
+          <span class="tier-pill">match ${r.match_score}</span>
+        </div>
+        <div class="tl-snippet" style="margin:0.5rem 0">${esc(r.brief || "")}</div>
+        <div class="subtle" style="margin-bottom:0.6rem">Why you: ${esc(r.match_reason || "")}</div>
+        ${r.my_proposal_status
+          ? `<span class="status-pill ${r.my_proposal_status === 'shortlisted' ? 'HOT' : 'WARM'}">
+               Proposal ${esc(r.my_proposal_status)}</span>`
+          : `<button class="btn-primary propose-btn" data-rfq="${r.id}">Submit proposal</button>`}
+        <div class="propose-form hidden" id="pf-${r.id}">
+          <input class="pf-price" placeholder="Price indication (e.g. ₹48 cr)" />
+          <input class="pf-weeks" type="number" placeholder="Lead time (weeks)" />
+          <textarea class="pf-summary outcome-reason" placeholder="Your proposal summary…"></textarea>
+          <button class="btn-primary pf-send" data-rfq="${r.id}">Send proposal</button>
+          <span class="pf-msg outcome-msg"></span>
+        </div>
+      </div>`).join("");
+    box.querySelectorAll(".propose-btn").forEach(b => b.addEventListener("click", () =>
+      $$("pf-" + b.dataset.rfq).classList.toggle("hidden")));
+    box.querySelectorAll(".pf-send").forEach(b => b.addEventListener("click", () =>
+      sendProposal(b.dataset.rfq, b)));
+  } catch (e) {
+    box.innerHTML = `<div class="error">Failed: ${esc(e.message)}</div>`;
+  }
+}
+
+async function sendProposal(rfqId, btn) {
+  const form = $$("pf-" + rfqId);
+  const msg = form.querySelector(".pf-msg");
+  try {
+    await apiFetch(`/marketplace/rfqs/${rfqId}/proposals`, { method: "POST",
+      body: JSON.stringify({
+        summary: form.querySelector(".pf-summary").value,
+        price_indication: form.querySelector(".pf-price").value,
+        lead_time_weeks: parseInt(form.querySelector(".pf-weeks").value, 10) || null }) });
+    msg.textContent = "✓ Proposal submitted"; msg.className = "pf-msg outcome-msg ok";
+    setTimeout(loadMarketplace, 800);
+  } catch (e) { msg.textContent = "Failed: " + e.message; msg.className = "pf-msg outcome-msg err"; }
 }
 
 document.querySelectorAll(".topnav a").forEach(a =>

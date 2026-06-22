@@ -322,6 +322,14 @@ header {
   border-bottom: 1px solid var(--border); font-size: 0.9rem; }
 .benchmark .bm-row:last-child { border: none; }
 
+/* ── MARKETPLACE (vendor) ── */
+.market-card { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.1rem; margin-bottom: 0.8rem; }
+.propose-form { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.propose-form input { background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.85rem; }
+.propose-btn { padding: 0.45rem 1rem; }
+
 /* ── ONBOARDING ── */
 .onboard-card { background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 460px; }
