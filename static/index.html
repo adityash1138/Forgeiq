@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeIQ — Vendor Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="screen">
+  <div class="login-card">
+    <div class="logo">⚡ ForgeIQ</div>
+    <p class="tagline">B2B Lead Intelligence · Indian Manufacturing</p>
+    <form id="login-form">
+      <label>Your API Key</label>
+      <input id="api-key-input" type="password" placeholder="fiq_…" autocomplete="current-password" required />
+      <button type="submit">Sign In</button>
+    </form>
+    <p id="login-error" class="error hidden"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="dashboard-screen" class="screen hidden">
+  <header>
+    <div class="brand">⚡ ForgeIQ</div>
+    <div class="header-right">
+      <span id="vendor-name" class="vendor-name"></span>
+      <button id="logout-btn" class="btn-ghost">Sign out</button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="top-bar">
+      <h1>Your Leads</h1>
+      <div class="filters">
+        <select id="filter-status">
+          <option value="">All statuses</option>
+          <option value="HOT">HOT</option>
+          <option value="WARM">WARM</option>
+          <option value="COLD">COLD</option>
+        </select>
+        <input id="filter-city" type="text" placeholder="Filter by city…" />
+        <button id="filter-btn" class="btn-primary">Apply</button>
+      </div>
+    </div>
+
+    <div id="leads-loading" class="loading">Loading leads…</div>
+    <div id="leads-empty" class="empty hidden">No leads match your filters.</div>
+    <div id="leads-error" class="error hidden"></div>
+
+    <div id="leads-grid" class="leads-grid hidden"></div>
+  </div>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <button id="modal-close" class="modal-close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

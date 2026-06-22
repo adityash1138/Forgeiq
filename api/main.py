@@ -1,12 +1,24 @@
 """ForgeIQ FastAPI application — REST layer over the intelligence pipeline."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from api.routers import auth, leads, outcomes, vendors
 from db.connection import fetch_all, fetch_one
 
 app = FastAPI(title="ForgeIQ API", version="1.0")
+
+_static = Path(__file__).parent.parent / "static"
+if _static.exists():
+    app.mount("/static", StaticFiles(directory=str(_static)), name="static")
+
+    @app.get("/", include_in_schema=False)
+    def dashboard():
+        return FileResponse(str(_static / "index.html"))
 
 app.include_router(leads.router, prefix="/api/v1/leads", tags=["leads"])
 app.include_router(vendors.router, prefix="/api/v1/vendors", tags=["vendors"])
