@@ -1,0 +1,13 @@
+# ForgeIQ dependencies
+psycopg2-binary==2.9.9      # PostgreSQL driver
+requests==2.32.3           # HTTP for scrapers
+beautifulsoup4==4.12.3     # HTML parsing
+lxml==5.3.0                # fast parser backend for BeautifulSoup
+pdfplumber==0.11.4         # PLI / government PDF parsing
+feedparser==6.0.11         # RSS feeds (news, VC, LinkedIn)
+anthropic==0.39.0          # Claude API for entity resolution
+fastapi==0.115.5           # REST API layer
+uvicorn[standard]==0.32.1  # ASGI server for FastAPI
+pydantic==2.10.3           # request/response models
+apscheduler==3.10.4        # job scheduler
+python-dotenv==1.0.1       # load .env locally

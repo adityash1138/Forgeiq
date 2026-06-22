@@ -1,0 +1,37 @@
+{
+  "_comment": "Template for cascade_wave_config rows. application_id values are live UUIDs from the applications table and must be filled in during data entry (Week 9). Each trigger signal spawns one or more waves; a wave fires only inside its [activate_month_start, activate_month_end] window AND when a confirming signal arrives.",
+  "waves": [
+    {
+      "trigger_signal_type": "CAPEX_FILING",
+      "application_name_hint": "Battery Pack Assembly Line",
+      "wave_order": 1,
+      "activate_month_start": 2,
+      "activate_month_end": 5,
+      "confirming_signal_types": ["JOB_POSTING", "ICEGATE_IMPORT"]
+    },
+    {
+      "trigger_signal_type": "CAPEX_FILING",
+      "application_name_hint": "Body / Chassis Welding Line",
+      "wave_order": 2,
+      "activate_month_start": 5,
+      "activate_month_end": 9,
+      "confirming_signal_types": ["LAND_ACQUISITION", "JOB_POSTING"]
+    },
+    {
+      "trigger_signal_type": "PLI_APPROVAL",
+      "application_name_hint": "Battery Pack Assembly Line",
+      "wave_order": 1,
+      "activate_month_start": 0,
+      "activate_month_end": 4,
+      "confirming_signal_types": ["CAPEX_FILING", "ICEGATE_IMPORT"]
+    },
+    {
+      "trigger_signal_type": "LAND_ACQUISITION",
+      "application_name_hint": "General Plant Automation",
+      "wave_order": 1,
+      "activate_month_start": 3,
+      "activate_month_end": 8,
+      "confirming_signal_types": ["EC_CLEARANCE", "JOB_POSTING"]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_comment": "Mirror of the signal_type_config table for reference and for the app_tagger. The DB table is the source of truth at runtime; this file documents intent and seeds local tests.",
+  "tier_weights": { "Tier1": 1.0, "Tier2": 0.6, "Tier3": 0.25 },
+  "cascade_trigger_types": ["CAPEX_FILING", "PLI_APPROVAL", "ICEGATE_IMPORT", "LAND_ACQUISITION", "EC_CLEARANCE"],
+  "signals": {
+    "GEM_TENDER":        { "tier": "Tier1", "base_strength": 8,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 30,  "total_decay_days": 120, "is_cascade_trigger": "No" },
+    "CAPEX_FILING":      { "tier": "Tier1", "base_strength": 10, "decay_curve": "Wave",  "peak_start_days": 120, "peak_end_days": 270, "total_decay_days": 540, "is_cascade_trigger": "Yes" },
+    "PLI_APPROVAL":      { "tier": "Tier1", "base_strength": 9,  "decay_curve": "Wave",  "peak_start_days": 0,   "peak_end_days": 180, "total_decay_days": 540, "is_cascade_trigger": "Yes" },
+    "ICEGATE_IMPORT":    { "tier": "Tier1", "base_strength": 8,  "decay_curve": "Wave",  "peak_start_days": 0,   "peak_end_days": 120, "total_decay_days": 360, "is_cascade_trigger": "Yes" },
+    "JOB_POSTING":       { "tier": "Tier2", "base_strength": 6,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 60,  "total_decay_days": 150, "is_cascade_trigger": "No" },
+    "LAND_ACQUISITION":  { "tier": "Tier2", "base_strength": 7,  "decay_curve": "Wave",  "peak_start_days": 30,  "peak_end_days": 180, "total_decay_days": 540, "is_cascade_trigger": "Yes" },
+    "EC_CLEARANCE":      { "tier": "Tier2", "base_strength": 7,  "decay_curve": "Burn",  "peak_start_days": 60,  "peak_end_days": 240, "total_decay_days": 540, "is_cascade_trigger": "Yes" },
+    "OEM_CONTRACT_WIN":  { "tier": "Tier2", "base_strength": 7,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 45,  "total_decay_days": 180, "is_cascade_trigger": "No" },
+    "VC_PE_FUNDING":     { "tier": "Tier2", "base_strength": 6,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 60,  "total_decay_days": 240, "is_cascade_trigger": "No" },
+    "MCA_ROC_FILING":    { "tier": "Tier2", "base_strength": 5,  "decay_curve": "Burn",  "peak_start_days": 30,  "peak_end_days": 180, "total_decay_days": 480, "is_cascade_trigger": "No" },
+    "GST_NEW_STATE":     { "tier": "Tier3", "base_strength": 4,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 45,  "total_decay_days": 150, "is_cascade_trigger": "No" },
+    "LINKEDIN_ACTIVITY": { "tier": "Tier3", "base_strength": 3,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 30,  "total_decay_days": 90,  "is_cascade_trigger": "No" },
+    "NEWS_MENTION":      { "tier": "Tier3", "base_strength": 3,  "decay_curve": "Cliff", "peak_start_days": 0,   "peak_end_days": 30,  "total_decay_days": 90,  "is_cascade_trigger": "No" }
+  }
+}

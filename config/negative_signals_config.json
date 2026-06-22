@@ -1,0 +1,16 @@
+{
+  "_comment": "Mirror of negative_signals_config table. DB is source of truth at runtime.",
+  "severity_classes": {
+    "Class1_Existential": { "multiplier": 0.0, "scope": "All_Applications", "note": "Zeroes out every score for the company, full stop." },
+    "Class2_Heavy": { "multiplier": 0.1, "scope": "All_Applications", "note": "Company-wide suppression regardless of application. Auto-recovers after 90 days." },
+    "Class3_CategorySpecific": { "multiplier": 0.3, "scope": "Single_Application", "note": "Applies ONLY to the targeted application." }
+  },
+  "negatives": {
+    "INSOLVENCY_NCLT":      { "severity_class": "Class1_Existential",      "auto_recovers": false, "recovery_trigger": null },
+    "PLANT_SHUTDOWN":       { "severity_class": "Class1_Existential",      "auto_recovers": false, "recovery_trigger": null },
+    "MAJOR_LAYOFFS":        { "severity_class": "Class2_Heavy",            "auto_recovers": true,  "recovery_trigger": "90_days_elapsed" },
+    "CREDIT_DOWNGRADE":     { "severity_class": "Class2_Heavy",            "auto_recovers": true,  "recovery_trigger": "90_days_elapsed" },
+    "COMPETITOR_LOCKED_IN": { "severity_class": "Class3_CategorySpecific", "auto_recovers": true,  "recovery_trigger": "competitor_contract_expiry" },
+    "CATEGORY_INSOURCED":   { "severity_class": "Class3_CategorySpecific", "auto_recovers": true,  "recovery_trigger": "insourcing_reversal_signal" }
+  }
+}
