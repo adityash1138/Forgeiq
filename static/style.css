@@ -322,6 +322,27 @@ header {
   border-bottom: 1px solid var(--border); font-size: 0.9rem; }
 .benchmark .bm-row:last-child { border: none; }
 
+/* ── COPILOT ── */
+.copilot-wrap { max-width: 720px; display: flex; flex-direction: column; gap: 0.8rem; }
+.chat-log { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1rem; height: 50vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.7rem; }
+.chat-msg { padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.88rem;
+  line-height: 1.5; max-width: 85%; white-space: pre-wrap; }
+.chat-msg.bot { background: var(--surface2); align-self: flex-start; }
+.chat-msg.user { background: var(--accent); color: #fff; align-self: flex-end; }
+.chat-mode { font-size: 0.68rem; color: var(--warm); margin-top: 0.4rem; }
+.chat-suggest { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.chat-suggest .sg { background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); padding: 0.35rem 0.8rem; border-radius: 20px;
+  cursor: pointer; font-size: 0.8rem; }
+.chat-suggest .sg:hover { border-color: var(--accent); color: var(--accent); }
+.chat-input-row { display: flex; gap: 0.5rem; }
+.chat-input-row input { flex: 1; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); padding: 0.65rem 0.9rem; border-radius: 8px; font-size: 0.9rem;
+  outline: none; }
+.chat-input-row input:focus { border-color: var(--accent); }
+
 /* ── MARKETPLACE (vendor) ── */
 .market-card { background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; padding: 1.1rem; margin-bottom: 0.8rem; }

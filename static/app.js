@@ -326,6 +326,52 @@ function switchView(name) {
   if (name === "feedback") loadFeedback();
   if (name === "profile") loadProfile();
   if (name === "marketplace") loadMarketplace();
+  if (name === "copilot") initCopilot();
+}
+
+// ── copilot chat ──────────────────────────────────────────
+let copilotHistory = [];
+let copilotInit = false;
+function initCopilot() {
+  if (copilotInit) return;
+  copilotInit = true;
+  $$("chat-send").addEventListener("click", sendChat);
+  $$("chat-input").addEventListener("keydown", e => { if (e.key === "Enter") sendChat(); });
+  document.querySelectorAll(".sg").forEach(b => b.addEventListener("click", () => {
+    $$("chat-input").value = b.textContent; sendChat();
+  }));
+}
+
+function addChatMsg(text, who) {
+  const log = $$("chat-log");
+  const div = document.createElement("div");
+  div.className = `chat-msg ${who}`;
+  div.textContent = text;
+  log.appendChild(div); log.scrollTop = log.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  const input = $$("chat-input");
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = "";
+  addChatMsg(msg, "user");
+  const thinking = addChatMsg("…", "bot");
+  try {
+    const res = await apiFetch("/copilot/chat", { method: "POST",
+      body: JSON.stringify({ message: msg, history: copilotHistory }) });
+    if (!res) return;
+    thinking.textContent = res.reply;
+    if (res.mode === "fallback") {
+      thinking.innerHTML += `<div class="chat-mode">limited mode — set ANTHROPIC_API_KEY for full AI</div>`;
+    }
+    copilotHistory.push({ role: "user", content: msg });
+    copilotHistory.push({ role: "assistant", content: res.reply });
+    if (copilotHistory.length > 12) copilotHistory = copilotHistory.slice(-12);
+  } catch (e) {
+    thinking.textContent = "Error: " + e.message;
+  }
 }
 
 // ── marketplace view (vendor side) ────────────────────────
