@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeIQ — Free Capability Benchmark</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="buyer-wrap">
+  <div class="logo">⚡ ForgeIQ</div>
+  <h1 style="font-size:1.5rem;margin:0.6rem 0">Verified Buyer Benchmark</h1>
+  <p class="subtle">See how your plant's expansion signals compare against the
+    sector — free, in exchange for verifying your corporate email.</p>
+
+  <!-- FORM -->
+  <div id="buyer-form" class="benchmark">
+    <label class="bm-label">Corporate email</label>
+    <input id="b-email" type="email" placeholder="you@company.com" />
+    <label class="bm-label">Your role</label>
+    <input id="b-role" type="text" placeholder="e.g. Head of Procurement" />
+    <label class="bm-label">Company CIN</label>
+    <input id="b-cin" type="text" placeholder="L00000XX0000XXX000000" />
+    <button id="b-submit" class="btn-primary" style="width:100%;margin-top:1rem;padding:0.7rem">
+      Get my free benchmark</button>
+    <p id="b-error" class="error hidden"></p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="buyer-result" class="hidden"></div>
+
+  <p style="margin-top:1.5rem;font-size:0.8rem">
+    <a href="/" style="color:var(--text-muted)">← Back to ForgeIQ</a></p>
+</div>
+
+<style>
+  .bm-label{display:block;font-size:0.8rem;color:var(--color-text-muted,#7b82a8);
+    margin:0.7rem 0 0.3rem;color:#7b82a8}
+  .benchmark input{width:100%;background:#0f1117;border:1px solid #2e3250;
+    color:#e8eaf6;padding:0.55rem 0.8rem;border-radius:6px;font-size:0.9rem;outline:none}
+</style>
+<script src="/static/buyer.js"></script>
+</body>
+</html>

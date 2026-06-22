@@ -274,6 +274,54 @@ header {
 .outcome-msg.ok { color: #22c55e; }
 .outcome-msg.err { color: var(--hot); }
 
+/* ── TOP NAV + VIEWS ── */
+.topnav { display: flex; gap: 0.3rem; margin-left: 1.5rem; flex: 1; }
+.topnav a { padding: 0.4rem 0.9rem; font-size: 0.88rem; color: var(--text-muted);
+  cursor: pointer; border-radius: 6px; }
+.topnav a:hover { color: var(--text); }
+.topnav a.active { color: var(--accent); background: rgba(79,124,255,0.1); }
+.subtle { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ── FEEDBACK ── */
+.fb-row { display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.8rem 1rem; margin-bottom: 0.6rem; cursor: pointer; }
+.fb-row:hover { border-color: var(--accent); }
+.fb-pending { font-size: 0.8rem; color: var(--accent); }
+
+/* ── PROFILE ── */
+.profile-complete { margin-bottom: 1.4rem; }
+.pc-bar { height: 8px; background: var(--surface2); border-radius: 8px;
+  overflow: hidden; margin-bottom: 0.4rem; }
+.pc-fill { height: 100%; background: var(--accent); }
+.profile-complete span { font-size: 0.8rem; color: var(--text-muted); }
+.param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+  gap: 0.6rem; }
+.param { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.7rem 0.9rem; }
+.param.empty { opacity: 0.55; }
+.param-label { font-size: 0.72rem; color: var(--text-muted); display: flex;
+  justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+.param-src { font-size: 0.62rem; padding: 0.1rem 0.4rem; border-radius: 20px; }
+.src-entered { background: rgba(79,124,255,0.15); color: var(--accent); }
+.src-learned { background: rgba(34,197,94,0.15); color: #22c55e; }
+.src-derived { background: var(--surface2); color: var(--text-muted); }
+.param-value { font-size: 0.92rem; font-weight: 500; }
+.settings-form { max-width: 420px; }
+.settings-form label { display: block; font-size: 0.8rem; color: var(--text-muted);
+  margin: 0.8rem 0 0.3rem; }
+.settings-form input, .settings-form select { width: 100%; background: var(--bg);
+  border: 1px solid var(--border); color: var(--text); padding: 0.55rem 0.8rem;
+  border-radius: 6px; font-size: 0.9rem; outline: none; }
+
+/* ── BUYER PORTAL ── */
+.buyer-wrap { max-width: 520px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.benchmark { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.2rem; margin-top: 1.2rem; }
+.benchmark .bm-row { display: flex; justify-content: space-between; padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.benchmark .bm-row:last-child { border: none; }
+
 /* ── ONBOARDING ── */
 .onboard-card { background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 460px; }

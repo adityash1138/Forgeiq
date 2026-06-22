@@ -34,7 +34,10 @@ def list_leads(
         f"""
         SELECT s.id AS score_id, c.legal_name AS company_name,
                a.application_name, s.current_score, s.status,
-               ld.confidence_tier_shown, ld.delivered_at
+               ld.confidence_tier_shown, ld.delivered_at,
+               (SELECT o.outcome_status FROM outcomes o
+                WHERE o.delivery_id = ld.id
+                ORDER BY o.captured_at DESC LIMIT 1) AS latest_outcome
         FROM lead_delivery ld
         JOIN scores s ON s.id = ld.score_id
         JOIN companies c ON c.id = s.company_id
@@ -211,4 +214,5 @@ def _summary(row: dict) -> dict:
         "status": row["status"],
         "confidence_tier_shown": row.get("confidence_tier_shown"),
         "delivered_at": row.get("delivered_at"),
+        "latest_outcome": row.get("latest_outcome"),
     }

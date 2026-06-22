@@ -45,6 +45,7 @@ class LeadSummary(BaseModel):
     status: str
     confidence_tier_shown: Optional[str] = None
     delivered_at: Optional[datetime] = None
+    latest_outcome: Optional[str] = None         # None = awaiting feedback
 
 
 class ContactOut(BaseModel):

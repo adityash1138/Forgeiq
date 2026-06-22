@@ -41,6 +41,41 @@ def get_me(vendor: dict = Depends(get_current_vendor)):
     return _to_out(vendor)
 
 
+@router.get("/me/profile")
+def get_profile(vendor: dict = Depends(get_current_vendor)):
+    """Progressive-profiling view: each parameter, whether it was supplied at
+    onboarding or learned by ForgeIQ, plus an overall completeness score."""
+    leads = fetch_one(
+        "SELECT COUNT(*) AS n FROM lead_delivery WHERE vendor_id = %s",
+        (vendor["id"],))
+    outcomes = fetch_one(
+        "SELECT COUNT(*) AS n FROM outcomes o JOIN lead_delivery ld "
+        "ON ld.id = o.delivery_id WHERE ld.vendor_id = %s", (vendor["id"],))
+
+    # (label, value, source) — source: 'entered' | 'learned' | 'derived'
+    params = [
+        ("Company name", vendor.get("vendor_name"), "entered"),
+        ("Target application", str(vendor["application_id"])
+         if vendor.get("application_id") else None, "entered"),
+        ("Exclusivity tier", vendor.get("price_tier"), "entered"),
+        ("Geography served", ", ".join(vendor.get("geography") or []) or None, "entered"),
+        ("Minimum deal size (₹)", vendor.get("min_deal_size_inr"), "entered"),
+        ("Exclusivity level", vendor.get("exclusivity_level"), "derived"),
+        ("Onboarding complete", "Yes" if vendor.get("onboarding_complete") else "No", "derived"),
+        ("Leads received", (leads or {}).get("n", 0), "learned"),
+        ("Outcomes logged", (outcomes or {}).get("n", 0), "learned"),
+        ("Response rate", (f"{round(100*(outcomes or {}).get('n',0)/(leads or {}).get('n',1))}%"
+                           if (leads or {}).get("n") else None), "learned"),
+        ("Account created", str(vendor.get("created_at")) if vendor.get("created_at") else None, "derived"),
+    ]
+    rows = [{"label": l, "value": v, "source": s, "filled": v not in (None, "", "No")}
+            for l, v, s in params]
+    filled = sum(1 for r in rows if r["filled"])
+    return {"parameters": rows,
+            "completeness_pct": round(100 * filled / len(rows)),
+            "filled": filled, "total": len(rows)}
+
+
 @router.patch("/me", response_model=VendorOut)
 def update_me(body: VendorUpdate, vendor: dict = Depends(get_current_vendor)):
     """Update onboarding parameters (only the provided fields)."""

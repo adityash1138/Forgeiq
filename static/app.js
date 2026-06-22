@@ -317,6 +317,111 @@ $$("login-form").addEventListener("submit", e => {
   tryLogin($$("api-key-input").value.trim());
 });
 
+// ── view switching ────────────────────────────────────────
+function switchView(name) {
+  document.querySelectorAll(".topnav a").forEach(a =>
+    a.classList.toggle("active", a.dataset.view === name));
+  document.querySelectorAll(".view").forEach(v =>
+    v.classList.toggle("hidden", v.dataset.view !== name));
+  if (name === "feedback") loadFeedback();
+  if (name === "profile") loadProfile();
+}
+
+document.querySelectorAll(".topnav a").forEach(a =>
+  a.addEventListener("click", () => switchView(a.dataset.view)));
+
+// ── feedback view ─────────────────────────────────────────
+async function loadFeedback() {
+  const box = $$("feedback-list");
+  box.innerHTML = `<div class="loading">Loading…</div>`;
+  try {
+    const leads = await apiFetch("/leads");
+    if (!leads) return;
+    const pending = leads.filter(l => !l.latest_outcome);
+    const done = leads.filter(l => l.latest_outcome);
+    if (!pending.length && !done.length) {
+      box.innerHTML = `<div class="empty">No leads yet.</div>`; return;
+    }
+    box.innerHTML =
+      (pending.length ? pending.map(l => feedbackRow(l, true)).join("") : "") +
+      (done.length ? `<div class="section-title" style="margin-top:1.4rem">Logged</div>` +
+        done.map(l => feedbackRow(l, false)).join("") : "");
+    box.querySelectorAll("[data-fb]").forEach(el =>
+      el.addEventListener("click", () => openDetail(el.dataset.fb)));
+  } catch (e) {
+    box.innerHTML = `<div class="error">Failed: ${esc(e.message)}</div>`;
+  }
+}
+
+function feedbackRow(l, pending) {
+  const sc = statusClass(l.status);
+  return `<div class="fb-row" data-fb="${l.score_id}">
+    <div>
+      <div class="company-name">${esc(l.company_name)}</div>
+      <div class="application-name">${esc(l.application_name || "—")} · ${fmtDate(l.delivered_at)}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.6rem">
+      <span class="score-badge ${sc}">${Math.round(l.current_score)}</span>
+      ${pending ? `<span class="fb-pending">Log outcome →</span>`
+                : `<span class="status-pill ${sc}">${esc(l.latest_outcome)}</span>`}
+    </div></div>`;
+}
+
+// ── profile view ──────────────────────────────────────────
+async function loadProfile() {
+  const box = $$("profile-body");
+  box.innerHTML = `<div class="loading">Loading…</div>`;
+  try {
+    const [vendor, profile] = await Promise.all([
+      apiFetch("/vendors/me"), apiFetch("/vendors/me/profile")]);
+    if (!vendor || !profile) return;
+    box.innerHTML = `
+      <div class="profile-complete">
+        <div class="pc-bar"><div class="pc-fill" style="width:${profile.completeness_pct}%"></div></div>
+        <span>${profile.completeness_pct}% complete · ${profile.filled}/${profile.total} parameters</span>
+      </div>
+      <div class="section-title">What ForgeIQ knows about you</div>
+      <div class="param-grid">
+        ${profile.parameters.map(p => `
+          <div class="param ${p.filled ? "" : "empty"}">
+            <div class="param-label">${esc(p.label)}
+              <span class="param-src src-${p.source}">${p.source}</span></div>
+            <div class="param-value">${p.value != null && p.value !== "" ? esc(p.value) : "—"}</div>
+          </div>`).join("")}
+      </div>
+      <div class="section-title">Edit settings</div>
+      <div class="settings-form">
+        <label>Exclusivity tier</label>
+        <select id="set-tier">
+          ${["Premium","Standard","Value"].map(t =>
+            `<option ${vendor.price_tier===t?"selected":""}>${t}</option>`).join("")}
+        </select>
+        <label>Minimum deal size (₹)</label>
+        <input id="set-deal" type="number" value="${vendor.min_deal_size_inr || ""}" />
+        <label>Geography (comma-separated states)</label>
+        <input id="set-geo" type="text" value="${esc((vendor.geography||[]).join(', '))}" />
+        <button id="save-settings" class="btn-primary" style="margin-top:1rem">Save settings</button>
+        <span id="settings-msg" class="outcome-msg"></span>
+      </div>`;
+    $$("save-settings").addEventListener("click", saveSettings);
+  } catch (e) {
+    box.innerHTML = `<div class="error">Failed: ${esc(e.message)}</div>`;
+  }
+}
+
+async function saveSettings() {
+  const msg = $$("settings-msg");
+  const geo = $$("set-geo").value.split(",").map(s => s.trim()).filter(Boolean);
+  const deal = $$("set-deal").value;
+  try {
+    await apiFetch("/vendors/me", { method: "PATCH", body: JSON.stringify({
+      price_tier: $$("set-tier").value,
+      min_deal_size_inr: deal ? parseInt(deal, 10) : null,
+      geography: geo }) });
+    msg.textContent = "✓ Saved"; msg.className = "outcome-msg ok";
+  } catch (e) { msg.textContent = "Failed: " + e.message; msg.className = "outcome-msg err"; }
+}
+
 $$("logout-btn").addEventListener("click", logout);
 $$("filter-btn").addEventListener("click", loadLeads);
 $$("filter-city").addEventListener("keydown", e => { if (e.key === "Enter") loadLeads(); });

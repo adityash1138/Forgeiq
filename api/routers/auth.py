@@ -54,5 +54,33 @@ def register_buyer(body: BuyerRegister):
                 "VALUES (%s, %s, %s, 'High', 'Verified signup', TRUE)",
                 (company["id"], full_name, body.role))
 
-    return {"access_token": "buyer_" + secrets.token_urlsafe(24),
-            "company": company["legal_name"]}
+    # Free benchmark — the value exchanged for email verification.
+    from db.connection import fetch_all
+    scores = fetch_all(
+        """
+        SELECT a.application_name, s.current_score, s.status
+        FROM scores s LEFT JOIN applications a ON a.id = s.application_id
+        WHERE s.company_id = %s ORDER BY s.current_score DESC
+        """, (company["id"],))
+    sector = fetch_one(
+        "SELECT COUNT(*) AS companies, ROUND(AVG(current_score),1) AS avg_score "
+        "FROM scores") or {}
+    signal_count = (fetch_one(
+        "SELECT COUNT(*) AS n FROM raw_signals WHERE resolved_company_id = %s",
+        (company["id"],)) or {}).get("n", 0)
+    best = scores[0]["current_score"] if scores else 0
+
+    return {
+        "access_token": "buyer_" + secrets.token_urlsafe(24),
+        "company": company["legal_name"],
+        "benchmark": {
+            "your_top_score": float(best or 0),
+            "sector_avg_score": float(sector.get("avg_score") or 0),
+            "sector_companies_tracked": sector.get("companies", 0),
+            "signals_detected_on_you": signal_count,
+            "application_scores": [
+                {"application": s["application_name"],
+                 "score": float(s["current_score"] or 0), "status": s["status"]}
+                for s in scores],
+        },
+    }
