@@ -86,6 +86,17 @@ def list_applications():
         """)
 
 
+@app.get("/reseed")
+def reseed():
+    """One-time: force demo seed. Remove after first successful login."""
+    try:
+        from db.init_db import init_db
+        result = init_db(force=True)
+        return {"ok": True, "result": result}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
 @app.get("/health")
 def health():
     """System health + last scraper run timestamps."""
